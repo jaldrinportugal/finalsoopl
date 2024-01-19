@@ -1,0 +1,229 @@
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+public class Main {
+    static List<Item> items = new ArrayList<>();
+    static List<String> history = new ArrayList<>();
+    static User currentUser;
+
+    public static void main(String[] args) {
+        System.out.println("Welcome to the Auction System!");
+
+        while (true) {
+            System.out.println("\n1. Admin Login");
+            System.out.println("2. User Login");
+            System.out.println("3. Exit");
+            System.out.print("Choose an option: ");
+            int choice = new Scanner(System.in).nextInt();
+
+            switch (choice) {
+                case 1:
+                    adminLogin();
+                    break;
+                case 2:
+                    userLogin();
+                    break;
+                case 3:
+                    printHistory();
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+                    break;
+            }
+        }
+    }
+
+    static void adminLogin() {
+        System.out.print("Enter admin password: ");
+        String password = new Scanner(System.in).nextLine();
+
+        if (password.equals("password")) {
+            System.out.println("Admin login successful!");
+
+            while (true) {
+                System.out.println("\n1. Add Item");
+                System.out.println("2. Set Item Price");
+                System.out.println("3. View Items");
+                System.out.println("4. Logout");
+                System.out.print("Choose an option: ");
+                int adminChoice = new Scanner(System.in).nextInt();
+
+                switch (adminChoice) {
+                    case 1:
+                        addItem();
+                        break;
+                    case 2:
+                        setItemPrice();
+                        break;
+                    case 3:
+                        viewItems();
+                        break;
+                    case 4:
+                        printHistory();
+                        return;
+                    default:
+                        System.out.println("Invalid choice. Please try again.");
+                        break;
+                }
+            }
+        } else {
+            System.out.println("Incorrect password. Access denied.");
+        }
+    }
+
+    static void userLogin() {
+        System.out.print("Enter your username: ");
+        String username = new Scanner(System.in).nextLine();
+
+        currentUser = new User(username);
+
+        while (true) {
+            System.out.println("\n1. View Items");
+            System.out.println("2. Bid on Item");
+            System.out.println("3. Logout");
+            System.out.print("Choose an option: ");
+            int userChoice = new Scanner(System.in).nextInt();
+
+            switch (userChoice) {
+                case 1:
+                    viewItems();
+                    break;
+                case 2:
+                    bidOnItem();
+                    break;
+                case 3:
+                    currentUser = null;
+                    printHistory();
+                    return;
+                default:
+                    System.out.println("Invalid choice. Please try again.");
+                    break;
+            }
+        }
+    }
+
+    static void addItem() {
+        System.out.print("Enter item name: ");
+        String itemName = new Scanner(System.in).nextLine();
+        items.add(new Item(itemName));
+        System.out.println(itemName + " added to the auction.");
+
+        history.add("Admin added item: " + itemName);
+    }
+
+    static void setItemPrice() {
+        System.out.print("Enter item name: ");
+        String itemName = new Scanner(System.in).nextLine();
+        Item item = getItemByName(itemName);
+
+        if (item != null) {
+            System.out.print("Enter the price twice to confirm " + itemName + ": ");
+            
+
+            while (!new Scanner(System.in).hasNextDouble()) {
+                System.out.println("Invalid input. Please enter a valid price.");
+                new Scanner(System.in).nextLine();
+            }
+
+            double price = new Scanner(System.in).nextDouble();
+            item.setPrice(price);
+            System.out.println("Price for " + itemName + " set to " + price);
+
+            history.add("Admin set price for item " + itemName + " to " + price);
+        } else {
+            System.out.println("Item " + itemName + " not found.");
+        }
+    }
+
+    static void viewItems() {
+        System.out.println("\nCurrent Items in Auction:");
+
+        for (Item item : items) {
+            System.out.println(item.getName() + " - Current Price: " + item.getPrice());
+        }
+
+        history.add("User viewed items");
+    }
+
+    static void bidOnItem() {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.print("Enter item name to bid on: ");
+        String itemName = scanner.nextLine();
+        Item item = getItemByName(itemName);
+
+        if (item != null) {
+            System.out.print("Enter your bid for " + itemName + ": ");
+
+            while (!scanner.hasNextDouble()) {
+                System.out.println("Invalid input. Please enter a valid bid amount.");
+                scanner.nextLine();
+            }
+
+            double bidAmount = scanner.nextDouble();
+
+            if (bidAmount > item.getPrice()) {
+                item.setPrice(bidAmount);
+                System.out.println("Bid successful! New price for " + itemName + ": " + bidAmount);
+
+                history.add("User bid on item " + itemName + " with amount " + bidAmount);
+            } else {
+                System.out.println("Your bid amount must be greater than the current price.");
+            }
+        } else {
+            System.out.println("Item " + itemName + " not found.");
+        }
+    }
+
+    static void printHistory() {
+        System.out.println("\nAuction System History:");
+        for (String entry : history) {
+            System.out.println(entry);
+        }
+    }
+
+    static Item getItemByName(String itemName) {
+        for (Item item : items) {
+            if (item.getName().equals(itemName)) {
+                return item;
+            }
+        }
+        return null;
+    }
+}
+
+class Item {
+    private final String name;
+    private double price;
+
+    public Item(String name) {
+        this.name = name;
+        this.price = 0.0;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+}
+
+class User {
+    private final String username;
+
+    public User(String username) {
+        this.username = username;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+}
